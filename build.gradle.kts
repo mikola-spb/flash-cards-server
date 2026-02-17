@@ -7,7 +7,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization") version "2.3.0"
 }
 
-group = "com.example.com"
+group = "com.khasanov.flashcards"
 version = "0.0.1"
 
 application {

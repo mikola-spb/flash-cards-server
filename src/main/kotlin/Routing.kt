@@ -1,4 +1,4 @@
-package com.example.com
+package com.khasanov.flashcards
 
 import io.ktor.serialization.kotlinx.json.*
 import io.ktor.server.application.*
