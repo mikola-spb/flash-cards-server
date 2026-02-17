@@ -1,5 +1,9 @@
 val kotlin_version: String by project
 val logback_version: String by project
+val exposed_version: String by project
+val hikari_version: String by project
+val postgresql_version: String by project
+val flyway_version: String by project
 
 plugins {
     kotlin("jvm") version "2.3.0"
@@ -25,6 +29,14 @@ dependencies {
     implementation("io.ktor:ktor-server-netty")
     implementation("ch.qos.logback:logback-classic:$logback_version")
     implementation("io.ktor:ktor-server-config-yaml")
+    implementation("org.jetbrains.exposed:exposed-core:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-jdbc:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-dao:$exposed_version")
+    implementation("org.jetbrains.exposed:exposed-kotlin-datetime:$exposed_version")
+    implementation("org.postgresql:postgresql:$postgresql_version")
+    implementation("com.zaxxer:HikariCP:$hikari_version")
+    implementation("org.flywaydb:flyway-core:$flyway_version")
+    implementation("org.flywaydb:flyway-database-postgresql:$flyway_version")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
 }

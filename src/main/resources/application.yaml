@@ -4,3 +4,8 @@ ktor:
             - com.khasanov.flashcards.ApplicationKt.module
     deployment:
         port: 8080
+
+database:
+    url: "$DATABASE_URL:jdbc:postgresql://localhost:5432/flashcards"
+    user: "$DATABASE_USER:flashcards"
+    password: "$DATABASE_PASSWORD:flashcards"
