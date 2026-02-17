@@ -39,4 +39,6 @@ dependencies {
     implementation("org.flywaydb:flyway-database-postgresql:$flyway_version")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    testImplementation("org.testcontainers:postgresql:1.20.4")
+
 }
