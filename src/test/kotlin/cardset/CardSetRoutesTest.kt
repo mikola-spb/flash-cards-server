@@ -107,7 +107,7 @@ class CardSetRoutesTest: DatabaseTestSupport() {
 
         val createResponse = client.post("/api/card-sets") {
             contentType(ContentType.Application.Json)
-            setBody("""{"name":"To be delete"}""")
+            setBody("""{"name":"To be deleted"}""")
         }
         val created = Json.decodeFromString<CardSetResponse>(createResponse.bodyAsText())
 

@@ -1,5 +1,6 @@
 package com.khasanov.flashcards.config
 
+import com.khasanov.flashcards.card.cardRoutes
 import com.khasanov.flashcards.cardset.cardSetRoutes
 import io.ktor.server.application.*
 import io.ktor.server.response.*
@@ -11,5 +12,6 @@ fun Application.configureRouting() {
             call.respondText("OK")
         }
         cardSetRoutes()
+        cardRoutes()
     }
 }

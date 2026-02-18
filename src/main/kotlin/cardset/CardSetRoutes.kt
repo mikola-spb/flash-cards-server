@@ -1,11 +1,11 @@
 package com.khasanov.flashcards.cardset
 
 import com.khasanov.flashcards.db.CardSetRepository
+import com.khasanov.flashcards.toUUIDOrNull
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
-import java.util.*
 
 fun Route.cardSetRoutes(repository: CardSetRepository = CardSetRepository()) {
     route("/api/card-sets") {
@@ -14,7 +14,7 @@ fun Route.cardSetRoutes(repository: CardSetRepository = CardSetRepository()) {
         }
 
         get("/{id}") {
-            val id = call.parameters["id"]?.toUUID()
+            val id = call.parameters["id"]?.toUUIDOrNull()
                 ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid id")
 
             val cardSet = repository.findById(id)
@@ -30,7 +30,7 @@ fun Route.cardSetRoutes(repository: CardSetRepository = CardSetRepository()) {
         }
 
         put("/{id}") {
-            val id = call.parameters["id"]?.toUUID()
+            val id = call.parameters["id"]?.toUUIDOrNull()
                 ?: return@put call.respond(HttpStatusCode.BadRequest, "Invalid id")
 
             val request = call.receive<UpdateCardSetRequest>()
@@ -41,7 +41,7 @@ fun Route.cardSetRoutes(repository: CardSetRepository = CardSetRepository()) {
         }
 
         delete("/{id}") {
-            val id = call.parameters["id"]?.toUUID()
+            val id = call.parameters["id"]?.toUUIDOrNull()
                 ?: return@delete call.respond(HttpStatusCode.BadRequest, "Invalid id")
 
             if (repository.delete(id)) {
@@ -51,10 +51,4 @@ fun Route.cardSetRoutes(repository: CardSetRepository = CardSetRepository()) {
             }
         }
     }
-}
-
-private fun String.toUUID(): UUID? = try {
-    UUID.fromString(this)
-} catch (_: IllegalArgumentException) {
-    null
 }
