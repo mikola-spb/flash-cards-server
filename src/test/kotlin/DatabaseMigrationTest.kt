@@ -4,12 +4,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.test.Test
 import kotlin.test.assertTrue
 
-class DatabaseMigrationTest {
+class DatabaseMigrationTest: DatabaseTestSupport() {
 
     @Test
     fun `migration creates card_sets table`() {
-        DatabaseTestSupport // triggers container + migration
-
         val tables = transaction {
             exec("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'") { rs ->
                 buildList {

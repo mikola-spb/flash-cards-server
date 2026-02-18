@@ -5,8 +5,9 @@ import com.zaxxer.hikari.HikariDataSource
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import org.testcontainers.containers.PostgreSQLContainer
+import kotlin.test.BeforeTest
 
-object DatabaseTestSupport {
+open class DatabaseTestSupport {
 
     private val postgres = PostgreSQLContainer("postgres:17").apply {
         withDatabaseName("flashcards_test")
@@ -15,7 +16,7 @@ object DatabaseTestSupport {
         start()
     }
 
-    val dataSource: HikariDataSource = HikariDataSource(HikariConfig().apply {
+    private val dataSource: HikariDataSource = HikariDataSource(HikariConfig().apply {
         jdbcUrl = postgres.jdbcUrl
         username = postgres.username
         password = postgres.password
@@ -23,12 +24,18 @@ object DatabaseTestSupport {
         isAutoCommit = false
     })
 
-    init {
-        Flyway.configure()
-            .dataSource(dataSource)
-            .load()
-            .migrate()
+    private val flyway = Flyway.configure()
+        .dataSource(dataSource)
+        .cleanDisabled(false)
+        .load()
 
+    init {
         Database.connect(dataSource)
+    }
+
+    @BeforeTest
+    fun setup() {
+        flyway.clean()
+        flyway.migrate()
     }
 }
