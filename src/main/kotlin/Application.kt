@@ -1,5 +1,8 @@
 package com.khasanov.flashcards
 
+import com.khasanov.flashcards.config.configureDatabase
+import com.khasanov.flashcards.config.configureRouting
+import com.khasanov.flashcards.config.configureSerialization
 import io.ktor.server.application.*
 
 fun main(args: Array<String>) {

@@ -1,5 +1,7 @@
 package com.khasanov.flashcards
 
+import com.khasanov.flashcards.config.configureRouting
+import com.khasanov.flashcards.config.configureSerialization
 import io.ktor.client.request.*
 import io.ktor.http.*
 import io.ktor.server.testing.*
