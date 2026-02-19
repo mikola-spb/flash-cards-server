@@ -7,6 +7,7 @@ object CardSetTable : Table("card_sets") {
     val id = uuid("id").autoGenerate()
     val name = text("name")
     val icon = text("icon").nullable()
+    val userId = uuid("user_id").references(UserTable.id)
     val createdAt = timestampWithTimeZone("created_at")
     val updatedAt = timestampWithTimeZone("updated_at")
 
