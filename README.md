@@ -1,41 +1,74 @@
-# flash-cards
+# Flash Cards
 
-This project was created using the [Ktor Project Generator](https://start.ktor.io).
+A backend API for a flash card application focused on learning foreign language words.
 
-Here are some useful links to get you started:
+Users create card sets, add cards with front/back text, run learning sessions, 
+and track their progress via per-card statistics (attempts, success streaks, learning state).
 
-- [Ktor Documentation](https://ktor.io/docs/home.html)
-- [Ktor GitHub page](https://github.com/ktorio/ktor)
-- The [Ktor Slack chat](https://app.slack.com/client/T09229ZC6/C0A974TJ9). You'll need to [request an invite](https://surveys.jetbrains.com/s3/kotlin-slack-sign-up) to join.
+## Tech stack
 
-## Features
+- Kotlin 2.3, JVM 21
+- Ktor (HTTP server)
+- Exposed (SQL ORM)
+- PostgreSQL 17
+- Flyway (database migrations)
+- Testcontainers (integration tests)
 
-Here's a list of features included in this project:
+## Prerequisites
 
-| Name                                                                   | Description                                                                        |
-| ------------------------------------------------------------------------|------------------------------------------------------------------------------------ |
-| [Routing](https://start.ktor.io/p/routing)                             | Provides a structured routing DSL                                                  |
-| [Content Negotiation](https://start.ktor.io/p/content-negotiation)     | Provides automatic content conversion according to Content-Type and Accept headers |
-| [kotlinx.serialization](https://start.ktor.io/p/kotlinx-serialization) | Handles JSON serialization using kotlinx.serialization library                     |
+- JDK 21+
+- Docker (required for running tests via Testcontainers and for local PostgreSQL)
 
 ## Building & Running
 
-To build or run the project, use one of the following tasks:
+```bash
+# Run tests
+./gradlew test
 
-| Task                                    | Description                                                          |
-| -----------------------------------------|---------------------------------------------------------------------- |
-| `./gradlew test`                        | Run the tests                                                        |
-| `./gradlew build`                       | Build everything                                                     |
-| `./gradlew buildFatJar`                 | Build an executable JAR of the server with all dependencies included |
-| `./gradlew buildImage`                  | Build the docker image to use with the fat JAR                       |
-| `./gradlew publishImageToLocalRegistry` | Publish the docker image locally                                     |
-| `./gradlew run`                         | Run the server                                                       |
-| `./gradlew runDocker`                   | Run using the local docker image                                     |
+# Build everything (compile + test)
+./gradlew build
 
-If the server starts successfully, you'll see the following output:
+# Build a fat JAR with all dependencies
+./gradlew buildFatJar
 
+# Build docker image
+docker build -t flash-cards .
+
+# Run the server (development)
+docker compose up
+./gradlew run
 ```
-2024-12-04 14:32:45.584 [main] INFO  Application - Application started in 0.303 seconds.
-2024-12-04 14:32:45.682 [main] INFO  Application - Responding at http://0.0.0.0:8080
-```
 
+The server starts on `http://localhost:8080` by default.
+
+### Database configuration
+
+The app expects a PostgreSQL database. Configure via environment variables:
+
+| Variable            | Default                                |
+|---------------------|----------------------------------------|
+| `DATABASE_URL`      | `jdbc:postgresql://localhost:5432/flashcards` |
+| `DATABASE_USER`     | `flashcards`                           |
+| `DATABASE_PASSWORD` | `flashcards`                           |
+
+Flyway runs migrations automatically on startup.
+
+## API overview
+
+All endpoints under `/api` (except `POST /api/users`) require an `X-User-Id` header containing the user's external ID. This header is expected to be set by an upstream auth proxy (e.g. AWS Cognito).
+
+| Method | Endpoint                                   | Description                  |
+|--------|--------------------------------------------|------------------------------|
+| POST   | `/api/users`                               | Register a new user          |
+| GET    | `/api/card-sets`                           | List user's card sets        |
+| POST   | `/api/card-sets`                           | Create a card set            |
+| GET    | `/api/card-sets/{id}`                      | Get a card set               |
+| PUT    | `/api/card-sets/{id}`                      | Update a card set            |
+| DELETE | `/api/card-sets/{id}`                      | Delete a card set            |
+| GET    | `/api/card-sets/{cardSetId}/cards`         | List cards in a set          |
+| POST   | `/api/card-sets/{cardSetId}/cards`         | Create a card                |
+| GET    | `/api/card-sets/{cardSetId}/cards/{cardId}`| Get a card                   |
+| PUT    | `/api/card-sets/{cardSetId}/cards/{cardId}`| Update a card                |
+| DELETE | `/api/card-sets/{cardSetId}/cards/{cardId}`| Delete a card                |
+| POST   | `/api/sessions`                            | Save learning session logs   |
+| GET    | `/api/statistic`                           | Get per-card statistics      |
