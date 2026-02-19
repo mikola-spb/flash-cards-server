@@ -1,0 +1,104 @@
+### 1. Register user "nikolay"
+POST http://localhost:8080/api/users
+X-User-Id: user-1
+
+> {%
+    client.global.set("userId", response.body.id);
+%}
+
+### 2. Create card set "Basic words"
+POST http://localhost:8080/api/card-sets
+Content-Type: application/json
+X-User-Id: user-1
+
+{
+  "name": "Basic words",
+  "icon": "book"
+}
+
+> {%
+    client.global.set("cardSetId", response.body.id);
+%}
+
+### 3a. Add card: red / rot
+POST http://localhost:8080/api/card-sets/{{cardSetId}}/cards
+Content-Type: application/json
+X-User-Id: user-1
+
+{
+  "frontText": "red",
+  "backText": "rot"
+}
+
+> {%
+    client.global.set("cardRedId", response.body.id);
+%}
+
+### 3b. Add card: green / grün
+POST http://localhost:8080/api/card-sets/{{cardSetId}}/cards
+Content-Type: application/json
+X-User-Id: user-1
+
+{
+  "frontText": "green",
+  "backText": "grün"
+}
+
+> {%
+    client.global.set("cardGreenId", response.body.id);
+%}
+
+### 3c. Add card: yellow / gelb
+POST http://localhost:8080/api/card-sets/{{cardSetId}}/cards
+Content-Type: application/json
+X-User-Id: user-1
+
+{
+  "frontText": "yellow",
+  "backText": "gelb"
+}
+
+### 4. Load all cards
+GET http://localhost:8080/api/card-sets/{{cardSetId}}/cards
+X-User-Id: user-1
+
+### 5. Save session logs
+# "red": attempted twice — first wrong, then correct
+# "green": one attempt — correct
+# "yellow": no attempts (not included)
+POST http://localhost:8080/api/sessions
+Content-Type: application/json
+X-User-Id: user-1
+
+{
+  "records": [
+    {
+      "id": "a0000000-0000-0000-0000-000000000001",
+      "sessionId": "10000000-0000-0000-0000-000000000001",
+      "cardId": "{{cardRedId}}",
+      "displayedAt": "2026-02-19T10:00:00.000Z",
+      "flippedAt": "2026-02-19T10:00:03.000Z",
+      "isKnown": false
+    },
+    {
+      "id": "a0000000-0000-0000-0000-000000000002",
+      "sessionId": "10000000-0000-0000-0000-000000000001",
+      "cardId": "{{cardRedId}}",
+      "displayedAt": "2026-02-19T10:00:05.000Z",
+      "flippedAt": "2026-02-19T10:00:07.000Z",
+      "isKnown": true
+    },
+    {
+      "id": "a0000000-0000-0000-0000-000000000003",
+      "sessionId": "10000000-0000-0000-0000-000000000001",
+      "cardId": "{{cardGreenId}}",
+      "displayedAt": "2026-02-19T10:00:10.000Z",
+      "flippedAt": "2026-02-19T10:00:12.000Z",
+      "isKnown": true
+    }
+  ]
+}
+
+### 6. Get statistics
+GET http://localhost:8080/api/statistic
+X-User-Id: user-1
