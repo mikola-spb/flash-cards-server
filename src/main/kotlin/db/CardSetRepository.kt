@@ -3,6 +3,7 @@ package com.khasanov.flashcards.db
 import com.khasanov.flashcards.cardset.CardSetResponse
 import com.khasanov.flashcards.cardset.CreateCardSetRequest
 import com.khasanov.flashcards.cardset.UpdateCardSetRequest
+import io.ktor.util.logging.KtorSimpleLogger
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestampWithTimeZone
@@ -10,6 +11,7 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import java.util.*
 
 class CardSetRepository {
+    private val logger = KtorSimpleLogger("com.khasanov.flashcards.db.CardSetRepository")
 
     suspend fun findAll(userId: UUID): List<CardSetResponse> = newSuspendedTransaction {
         CardSetTable.selectAll()
@@ -43,7 +45,10 @@ class CardSetRepository {
             request.icon?.let { value -> it[icon] = value }
             it[updatedAt] = CurrentTimestampWithTimeZone
         }
-        if (updated == 0) return@newSuspendedTransaction null
+        if (updated == 0) {
+            logger.info("User $userId tries to update not existing or not owned card set $id")
+            return@newSuspendedTransaction null
+        }
 
         CardSetTable.selectAll()
             .where { (CardSetTable.id eq id) and (CardSetTable.userId eq userId) }
@@ -52,7 +57,11 @@ class CardSetRepository {
     }
 
     suspend fun delete(userId: UUID, id: UUID): Boolean = newSuspendedTransaction {
-        CardSetTable.deleteWhere { (CardSetTable.id eq id) and (CardSetTable.userId eq userId) } > 0
+        val deletedCount = CardSetTable.deleteWhere { (CardSetTable.id eq id) and (CardSetTable.userId eq userId) }
+        if (deletedCount == 0) {
+            logger.info("User $userId tries to delete not existing or not owned card set $id")
+        }
+        deletedCount > 0
     }
 
     private fun ResultRow.toCardSetResponse() = CardSetResponse(

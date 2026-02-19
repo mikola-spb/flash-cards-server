@@ -3,6 +3,7 @@ package com.khasanov.flashcards.db
 import com.khasanov.flashcards.card.CardResponse
 import com.khasanov.flashcards.card.CreateCardRequest
 import com.khasanov.flashcards.card.UpdateCardRequest
+import io.ktor.util.logging.KtorSimpleLogger
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.kotlin.datetime.CurrentTimestampWithTimeZone
@@ -10,25 +11,31 @@ import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransacti
 import java.util.*
 
 class CardRepository {
+    private val logger = KtorSimpleLogger("com.khasanov.flashcards.db.CardRepository")
 
-    suspend fun findAllByCardSetId(cardSetId: UUID): List<CardResponse> = newSuspendedTransaction {
-        CardTable.selectAll()
-            .where { CardTable.cardSetId eq cardSetId }
+    suspend fun findAllByCardSetId(userId: UUID, cardSetId: UUID): List<CardResponse> = newSuspendedTransaction {
+        CardTable.innerJoin(CardSetTable)
+            .selectAll()
+            .where { (CardTable.cardSetId eq cardSetId) and (CardSetTable.userId eq userId) }
             .map { it.toCardResponse() }
     }
 
-    suspend fun findById(cardSetId: UUID, cardId: UUID): CardResponse? = newSuspendedTransaction {
-        CardTable.selectAll()
-            .where { (CardTable.id eq cardId) and (CardTable.cardSetId eq cardSetId) }
+    suspend fun findById(userId: UUID, cardSetId: UUID, cardId: UUID): CardResponse? = newSuspendedTransaction {
+        CardTable.innerJoin(CardSetTable)
+            .selectAll()
+            .where { (CardTable.id eq cardId) and (CardTable.cardSetId eq cardSetId) and (CardSetTable.userId eq userId) }
             .singleOrNull()
             ?.toCardResponse()
     }
 
-    suspend fun create(cardSetId: UUID, request: CreateCardRequest): CardResponse? = newSuspendedTransaction {
+    suspend fun create(userId: UUID, cardSetId: UUID, request: CreateCardRequest): CardResponse? = newSuspendedTransaction {
         val cardSetExists = CardSetTable.selectAll()
-            .where { CardSetTable.id eq cardSetId }
+            .where { (CardSetTable.id eq cardSetId) and (CardSetTable.userId eq userId) }
             .count() > 0
-        if (!cardSetExists) return@newSuspendedTransaction null
+        if (!cardSetExists) {
+            logger.info("User $userId tries to add a card into not existing or not owned card set $cardSetId")
+            return@newSuspendedTransaction null
+        }
 
         val insertedId = CardTable.insert {
             it[CardTable.cardSetId] = cardSetId
@@ -42,7 +49,15 @@ class CardRepository {
             .toCardResponse()
     }
 
-    suspend fun update(cardSetId: UUID, cardId: UUID, request: UpdateCardRequest): CardResponse? = newSuspendedTransaction {
+    suspend fun update(userId: UUID, cardSetId: UUID, cardId: UUID, request: UpdateCardRequest): CardResponse? = newSuspendedTransaction {
+        val ownsCardSet = CardSetTable.selectAll()
+            .where { (CardSetTable.id eq cardSetId) and (CardSetTable.userId eq userId) }
+            .count() > 0
+        if (!ownsCardSet) {
+            logger.info("User $userId tries to update a card of not existing or not owned card set $cardSetId")
+            return@newSuspendedTransaction null
+        }
+
         val updated = CardTable.update({ (CardTable.id eq cardId) and (CardTable.cardSetId eq cardSetId) }) {
             request.frontText?.let { value -> it[frontText] = value }
             request.backText?.let { value -> it[backText] = value }
@@ -56,7 +71,15 @@ class CardRepository {
             .toCardResponse()
     }
 
-    suspend fun delete(cardSetId: UUID, cardId: UUID): Boolean = newSuspendedTransaction {
+    suspend fun delete(userId: UUID, cardSetId: UUID, cardId: UUID): Boolean = newSuspendedTransaction {
+        val ownsCardSet = CardSetTable.selectAll()
+            .where { (CardSetTable.id eq cardSetId) and (CardSetTable.userId eq userId) }
+            .count() > 0
+        if (!ownsCardSet) {
+            logger.info("User $userId tries to delete a card from not existing or not owned card set $cardSetId")
+            return@newSuspendedTransaction false
+        }
+
         CardTable.deleteWhere { (CardTable.id eq cardId) and (CardTable.cardSetId eq cardSetId) } > 0
     }
 

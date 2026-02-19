@@ -5,14 +5,17 @@ import com.khasanov.flashcards.statistic.CardStatistic
 import com.khasanov.flashcards.statistic.StatisticResponse
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import java.util.*
 
 class StatisticRepository {
 
-    suspend fun findAll(): StatisticResponse = newSuspendedTransaction {
-        val sessionLog = SessionLogTable.selectAll()
+    suspend fun findAll(userId: UUID): StatisticResponse = newSuspendedTransaction {
+        val sessionLog = SessionLogTable
+            .innerJoin(CardTable)
+            .innerJoin(CardSetTable)
+            .select(SessionLogTable.columns)
+            .where { CardSetTable.userId eq userId }
             .orderBy(
                 SessionLogTable.cardId to SortOrder.ASC,
                 SessionLogTable.displayedAt to SortOrder.DESC,

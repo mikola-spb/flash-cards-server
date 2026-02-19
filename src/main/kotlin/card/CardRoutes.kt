@@ -1,5 +1,6 @@
 package com.khasanov.flashcards.card
 
+import com.khasanov.flashcards.config.userId
 import com.khasanov.flashcards.db.CardRepository
 import com.khasanov.flashcards.toUUIDOrNull
 import io.ktor.http.*
@@ -13,7 +14,7 @@ fun Route.cardRoutes(repository: CardRepository = CardRepository()) {
             val cardSetId = call.parameters["cardSetId"]?.toUUIDOrNull()
                 ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid cardSetId")
 
-            call.respond(repository.findAllByCardSetId(cardSetId))
+            call.respond(repository.findAllByCardSetId(call.userId(), cardSetId))
         }
 
         get("/{cardId}") {
@@ -22,7 +23,7 @@ fun Route.cardRoutes(repository: CardRepository = CardRepository()) {
             val cardId = call.parameters["cardId"]?.toUUIDOrNull()
                 ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid cardId")
 
-            val card = repository.findById(cardSetId, cardId)
+            val card = repository.findById(call.userId(), cardSetId, cardId)
                 ?: return@get call.respond(HttpStatusCode.NotFound)
 
             call.respond(card)
@@ -33,7 +34,7 @@ fun Route.cardRoutes(repository: CardRepository = CardRepository()) {
                 ?: return@post call.respond(HttpStatusCode.BadRequest, "Invalid cardSetId")
 
             val request = call.receive<CreateCardRequest>()
-            val created = repository.create(cardSetId, request)
+            val created = repository.create(call.userId(), cardSetId, request)
                 ?: return@post call.respond(HttpStatusCode.NotFound, "Card set not found")
 
             call.respond(HttpStatusCode.Created, created)
@@ -46,7 +47,7 @@ fun Route.cardRoutes(repository: CardRepository = CardRepository()) {
                 ?: return@put call.respond(HttpStatusCode.BadRequest, "Invalid cardId")
 
             val request = call.receive<UpdateCardRequest>()
-            val updated = repository.update(cardSetId, cardId, request)
+            val updated = repository.update(call.userId(), cardSetId, cardId, request)
                 ?: return@put call.respond(HttpStatusCode.NotFound)
 
             call.respond(updated)
@@ -58,7 +59,7 @@ fun Route.cardRoutes(repository: CardRepository = CardRepository()) {
             val cardId = call.parameters["cardId"]?.toUUIDOrNull()
                 ?: return@delete call.respond(HttpStatusCode.BadRequest, "Invalid cardId")
 
-            if (repository.delete(cardSetId, cardId)) {
+            if (repository.delete(call.userId(), cardSetId, cardId)) {
                 call.respond(HttpStatusCode.NoContent)
             } else {
                 call.respond(HttpStatusCode.NotFound)

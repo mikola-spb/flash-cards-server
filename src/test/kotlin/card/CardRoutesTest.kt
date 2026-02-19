@@ -4,6 +4,7 @@ import com.khasanov.flashcards.DatabaseTestSupport
 import com.khasanov.flashcards.TEST_USER_EXTERNAL_ID
 import com.khasanov.flashcards.config.configureRouting
 import com.khasanov.flashcards.config.configureSerialization
+import com.khasanov.flashcards.config.configureStatusPages
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -22,6 +23,7 @@ class CardRoutesTest : DatabaseTestSupport() {
         application {
             configureSerialization()
             configureRouting()
+            configureStatusPages()
         }
     }
 
