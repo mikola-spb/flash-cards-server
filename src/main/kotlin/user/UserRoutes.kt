@@ -6,7 +6,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.userRoutes(repository: UserRepository = UserRepository()) {
-    route("/api/users") {
+    route("/users") {
         post {
             val externalId = call.request.headers["X-User-Id"]
                 ?: return@post call.respond(HttpStatusCode.BadRequest, "Missing X-User-Id header")

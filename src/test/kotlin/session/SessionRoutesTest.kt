@@ -1,6 +1,7 @@
 package com.khasanov.flashcards.session
 
 import com.khasanov.flashcards.DatabaseTestSupport
+import com.khasanov.flashcards.TEST_USER_EXTERNAL_ID
 import com.khasanov.flashcards.config.configureRouting
 import com.khasanov.flashcards.config.configureSerialization
 import io.ktor.client.request.*
@@ -28,6 +29,7 @@ class SessionRoutesTest : DatabaseTestSupport() {
 
         val sessionId = "11111111-0000-0000-1111-000000000000"
         val response = client.post("/api/sessions") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
             contentType(ContentType.Application.Json)
             setBody("""{"records":[
                 {"id":"11111111-0000-0000-1111-000000000001","sessionId":"$sessionId","cardId":"$CARD_ID","displayedAt":"2026-02-18T14:30:00.000Z","flippedAt":"2026-02-18T14:30:02.000Z","isKnown":false},

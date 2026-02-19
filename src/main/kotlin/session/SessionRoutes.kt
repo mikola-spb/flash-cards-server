@@ -7,7 +7,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.sessionRoutes(repository: SessionLogRepository = SessionLogRepository()) {
-    route("/api/sessions") {
+    route("/sessions") {
         post {
             val request = call.receive<SaveSessionLogRecordsRequest>()
             val response = repository.save(request)

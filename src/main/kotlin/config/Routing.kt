@@ -14,10 +14,13 @@ fun Application.configureRouting() {
         get("/") {
             call.respondText("OK")
         }
-        userRoutes()
-        cardSetRoutes()
-        cardRoutes()
-        sessionRoutes()
-        statisticRoutes()
+        route("/api") {
+            install(UserInterceptor)
+            userRoutes()
+            cardSetRoutes()
+            cardRoutes()
+            sessionRoutes()
+            statisticRoutes()
+        }
     }
 }

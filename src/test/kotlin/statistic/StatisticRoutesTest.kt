@@ -1,6 +1,7 @@
 package com.khasanov.flashcards.statistic
 
 import com.khasanov.flashcards.DatabaseTestSupport
+import com.khasanov.flashcards.TEST_USER_EXTERNAL_ID
 import com.khasanov.flashcards.config.configureRouting
 import com.khasanov.flashcards.config.configureSerialization
 import io.ktor.client.request.*
@@ -27,7 +28,9 @@ class StatisticRoutesTest : DatabaseTestSupport() {
     fun `GET returns statistic for all cards`() = testApplication {
         configureApp()
 
-        val response = client.get("/api/statistic")
+        val response = client.get("/api/statistic") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
+        }
         assertEquals(HttpStatusCode.OK, response.status)
         val statistic = Json.decodeFromString<StatisticResponse>(response.bodyAsText())
         assertEquals(1, statistic.cardStatistics.size)

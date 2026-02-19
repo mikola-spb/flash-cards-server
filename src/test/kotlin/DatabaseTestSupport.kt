@@ -7,6 +7,8 @@ import org.jetbrains.exposed.sql.Database
 import org.testcontainers.containers.PostgreSQLContainer
 import kotlin.test.BeforeTest
 
+const val TEST_USER_EXTERNAL_ID = "test-user-external-id"
+
 open class DatabaseTestSupport {
 
     private val postgres = PostgreSQLContainer("postgres:17").apply {

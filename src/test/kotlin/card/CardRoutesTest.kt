@@ -1,6 +1,7 @@
 package com.khasanov.flashcards.card
 
 import com.khasanov.flashcards.DatabaseTestSupport
+import com.khasanov.flashcards.TEST_USER_EXTERNAL_ID
 import com.khasanov.flashcards.config.configureRouting
 import com.khasanov.flashcards.config.configureSerialization
 import io.ktor.client.request.*
@@ -28,7 +29,9 @@ class CardRoutesTest : DatabaseTestSupport() {
     fun `GET returns all cards for a card set`() = testApplication {
         configureApp()
 
-        val response = client.get("/api/card-sets/${CARD_SET_ID}/cards")
+        val response = client.get("/api/card-sets/${CARD_SET_ID}/cards") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
+        }
         assertEquals(HttpStatusCode.OK, response.status)
         val cards = Json.decodeFromString<List<CardResponse>>(response.bodyAsText())
         assertEquals(1, cards.size)
@@ -40,7 +43,9 @@ class CardRoutesTest : DatabaseTestSupport() {
     fun `GET by id returns a card`() = testApplication {
         configureApp()
 
-        val response = client.get("/api/card-sets/${CARD_SET_ID}/cards/$CARD_ID")
+        val response = client.get("/api/card-sets/${CARD_SET_ID}/cards/$CARD_ID") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
+        }
         assertEquals(HttpStatusCode.OK, response.status)
         val body = Json.decodeFromString<CardResponse>(response.bodyAsText())
         assertEquals("hello", body.frontText)
@@ -52,7 +57,9 @@ class CardRoutesTest : DatabaseTestSupport() {
     fun `GET by id returns 404 for unknown card`() = testApplication {
         configureApp()
 
-        val response = client.get("/api/card-sets/${CARD_SET_ID}/cards/00000000-0000-0000-0000-000000000000")
+        val response = client.get("/api/card-sets/${CARD_SET_ID}/cards/00000000-0000-0000-0000-000000000000") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
+        }
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
 
@@ -61,6 +68,7 @@ class CardRoutesTest : DatabaseTestSupport() {
         configureApp()
 
         val response = client.post("/api/card-sets/${CARD_SET_ID}/cards") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
             contentType(ContentType.Application.Json)
             setBody("""{"frontText":"goodbye","backText":"Auf Wiedersehen"}""")
         }
@@ -74,7 +82,9 @@ class CardRoutesTest : DatabaseTestSupport() {
         assertNotNull(body.id)
 
         // all cards in the set
-        val responseAllCards = client.get("/api/card-sets/${CARD_SET_ID}/cards")
+        val responseAllCards = client.get("/api/card-sets/${CARD_SET_ID}/cards") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
+        }
         assertEquals(HttpStatusCode.OK, responseAllCards.status)
         val allCards = Json.decodeFromString<List<CardResponse>>(responseAllCards.bodyAsText())
         assertEquals(2, allCards.size)
@@ -85,6 +95,7 @@ class CardRoutesTest : DatabaseTestSupport() {
         configureApp()
 
         val response = client.post("/api/card-sets/00000000-0000-0000-0000-000000000000/cards") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
             contentType(ContentType.Application.Json)
             setBody("""{"frontText":"hello","backText":"Hallo"}""")
         }
@@ -97,6 +108,7 @@ class CardRoutesTest : DatabaseTestSupport() {
         configureApp()
 
         val response = client.put("/api/card-sets/${CARD_SET_ID}/cards/$CARD_ID") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
             contentType(ContentType.Application.Json)
             setBody("""{"frontText":"hi","backText":"Hallo!"}""")
         }
@@ -106,7 +118,9 @@ class CardRoutesTest : DatabaseTestSupport() {
         assertEquals("Hallo!", body.backText)
 
         // all cards in the set
-        val responseAllCards = client.get("/api/card-sets/${CARD_SET_ID}/cards")
+        val responseAllCards = client.get("/api/card-sets/${CARD_SET_ID}/cards") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
+        }
         assertEquals(HttpStatusCode.OK, responseAllCards.status)
         val allCards = Json.decodeFromString<List<CardResponse>>(responseAllCards.bodyAsText())
         assertEquals(1, allCards.size)
@@ -118,15 +132,20 @@ class CardRoutesTest : DatabaseTestSupport() {
 
         // Create a throwaway card for deletion
         val createResponse = client.post("/api/card-sets/${CARD_SET_ID}/cards") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
             contentType(ContentType.Application.Json)
             setBody("""{"frontText":"to delete","backText":"löschen"}""")
         }
         val created = Json.decodeFromString<CardResponse>(createResponse.bodyAsText())
 
-        val deleteResponse = client.delete("/api/card-sets/${CARD_SET_ID}/cards/${created.id}")
+        val deleteResponse = client.delete("/api/card-sets/${CARD_SET_ID}/cards/${created.id}") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
+        }
         assertEquals(HttpStatusCode.NoContent, deleteResponse.status)
 
-        val getResponse = client.get("/api/card-sets/${CARD_SET_ID}/cards/${created.id}")
+        val getResponse = client.get("/api/card-sets/${CARD_SET_ID}/cards/${created.id}") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
+        }
         assertEquals(HttpStatusCode.NotFound, getResponse.status)
     }
 
@@ -134,7 +153,9 @@ class CardRoutesTest : DatabaseTestSupport() {
     fun `DELETE returns 404 for unknown card`() = testApplication {
         configureApp()
 
-        val response = client.delete("/api/card-sets/${CARD_SET_ID}/cards/00000000-0000-0000-0000-000000000000")
+        val response = client.delete("/api/card-sets/${CARD_SET_ID}/cards/00000000-0000-0000-0000-000000000000") {
+            header("X-User-Id", TEST_USER_EXTERNAL_ID)
+        }
         assertEquals(HttpStatusCode.NotFound, response.status)
     }
 }

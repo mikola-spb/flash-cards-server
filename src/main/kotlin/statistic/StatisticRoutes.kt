@@ -5,7 +5,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.statisticRoutes(repository: StatisticRepository = StatisticRepository()) {
-    route("/api/statistic") {
+    route("/statistic") {
         get {
             call.respond(repository.findAll())
         }

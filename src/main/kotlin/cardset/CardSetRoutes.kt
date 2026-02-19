@@ -8,7 +8,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.cardSetRoutes(repository: CardSetRepository = CardSetRepository()) {
-    route("/api/card-sets") {
+    route("/card-sets") {
         get {
             call.respond(repository.findAll())
         }

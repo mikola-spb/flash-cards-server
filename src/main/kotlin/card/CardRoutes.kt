@@ -8,7 +8,7 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 fun Route.cardRoutes(repository: CardRepository = CardRepository()) {
-    route("/api/card-sets/{cardSetId}/cards") {
+    route("/card-sets/{cardSetId}/cards") {
         get {
             val cardSetId = call.parameters["cardSetId"]?.toUUIDOrNull()
                 ?: return@get call.respond(HttpStatusCode.BadRequest, "Invalid cardSetId")
